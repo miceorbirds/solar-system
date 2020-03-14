@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DX", "DX\DX.vcxproj", "{9F0AEF6C-E365-450C-A3DB-DF3F7A97DBBB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OOPDx", "OOPDx\OOPDx.vcxproj", "{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,14 +21,6 @@ Global
 		{9F0AEF6C-E365-450C-A3DB-DF3F7A97DBBB}.Release|x64.Build.0 = Release|x64
 		{9F0AEF6C-E365-450C-A3DB-DF3F7A97DBBB}.Release|x86.ActiveCfg = Release|Win32
 		{9F0AEF6C-E365-450C-A3DB-DF3F7A97DBBB}.Release|x86.Build.0 = Release|Win32
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Debug|x64.ActiveCfg = Debug|x64
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Debug|x64.Build.0 = Debug|x64
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Debug|x86.ActiveCfg = Debug|Win32
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Debug|x86.Build.0 = Debug|Win32
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Release|x64.ActiveCfg = Release|x64
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Release|x64.Build.0 = Release|x64
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Release|x86.ActiveCfg = Release|Win32
-		{6F3B07F5-4DE2-4D8C-90EE-99B22ADE28EF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,5 +28,4 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {98DA9512-3E02-4097-B641-4C7DEC8E1133}
 	EndGlobalSection
-	
 EndGlobal

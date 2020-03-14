@@ -47,8 +47,17 @@ const int Height = 800;
 
 DirectX::XMMATRIX WVP;
 ///////////////**************new**************////////////////////
-XMMATRIX cube1_world;
-XMMATRIX cube2_world;
+XMMATRIX c_mercury_world;
+XMMATRIX c_sun_world;
+XMMATRIX c_venus_world;
+XMMATRIX c_Earth_world;
+XMMATRIX c_Mars_world;
+XMMATRIX c_Upiter_world;
+XMMATRIX c_Saturn_world;
+XMMATRIX c_Uran_world;
+XMMATRIX c_Neptune_world;
+XMMATRIX c_Pluto_world;
+XMMATRIX c_luna_world;
 ///////////////**************new**************////////////////////
 XMMATRIX camView;
 XMMATRIX camProjection;
@@ -62,6 +71,13 @@ XMMATRIX Rotation;
 XMMATRIX Scale;
 XMMATRIX Translation;
 float rot = 0.01f;
+float rot2 = 0.02f;
+float rot3 = 0.02f;
+float rot4 = 0.02f;
+float rot5 = 0.02f;
+float rot6 = 0.02f;
+float rot7 = 0.02f;
+float rot8 = 0.02f;
 ///////////////**************new**************////////////////////
 
 //Function Prototypes//
@@ -358,9 +374,6 @@ bool InitScene()
     {
 
     }
-	
-  /*  hr = D3DX11CompileFromFile(L"Effects.fx", 0, 0, "VS", "vs_4_0", 0, 0, 0, &VS_Buffer, 0, 0);
-    hr = D3DX11CompileFromFile(L"Effects.fx", 0, 0, "PS", "ps_4_0", 0, 0, 0, &PS_Buffer, 0, 0);*/
 
     //Create the Shader Objects
     hr = d3d11Device->CreateVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
@@ -374,14 +387,15 @@ bool InitScene()
     //Create the vertex buffer
     Vertex v[] =
     {
-        Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
-        Vertex(-1.0f, +1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f),
-        Vertex(+1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f),
-        Vertex(+1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f),
-        Vertex(-1.0f, -1.0f, +1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
-        Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-        Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.0f, 1.0f, 1.0f),
-        Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+        Vertex(-1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
+        Vertex(-1.0f, +1.0f, -1.0f, 1.0f, 0.843137324f, 0.0f, 1.0f),
+        Vertex(+1.0f, +1.0f, -1.0f, 1.0f, 0.843137324f, 1.0f, 1.0f),
+        Vertex(+1.0f, -1.0f, -1.0f, 0.541176498f, 0.168627456f, 0.886274576f, 1.0f),
+
+        Vertex(-1.0f, -1.0f, +1.0f, 0.541176498f, 0.168627456f, 0.886274576f, 1.0f),
+        Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
+        Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
+        Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
     };
 
     DWORD indices[] = {
@@ -435,7 +449,7 @@ bool InitScene()
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = 0;
     vertexBufferDesc.MiscFlags = 0;
-    ///////////////**************new**************////////////////////
+
 
     D3D11_SUBRESOURCE_DATA vertexBufferData;
 
@@ -486,7 +500,7 @@ bool InitScene()
 
     //Camera information
     ///////////////**************new**************////////////////////
-    camPosition = XMVectorSet(0.0f, 3.0f, -15.0f, 0.0f);
+    camPosition = XMVectorSet(0.0f, 7.0f, -15.0f, 0.0f);
     ///////////////**************new**************////////////////////
     camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -495,67 +509,211 @@ bool InitScene()
     camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
 
     //Set the Projection matrix
-    camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)Width / Height, 1.0f, 1000.0f);
+    camProjection = XMMatrixPerspectiveFovLH(0.5f * 3.14f, (float)Width / Height, 1.0f, 1000.0f);
 
     return true;
 }
-///////////////**************new**************////////////////////
+
 void UpdateScene()
 {
     //Keep the cubes rotating
-    rot += .0005f;
+    rot += .0009f;
     if (rot > 6.26f)
         rot = 0.0f;
 
-    //Reset cube1World
-    cube1_world = XMMatrixIdentity();
+    rot2 += .001f;
+    if (rot > 6.26f)
+        rot = 0.0f;
 
-    //Define cube1's world space matrix
+    rot3 += .055f;
+    if (rot > 6.26f)
+        rot = 0.0f;
+
     XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 4.0f);
+    XMVECTOR rotaxis2 = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+    XMMATRIX Rotation2 = XMMatrixRotationAxis(rotaxis, rot3);
+    XMMATRIX Rotation3 = XMMatrixRotationAxis(rotaxis2, rot3);
 
-    //Set cube1's world space using the transformations
-    cube1_world = Translation * Rotation;
-
-    //Reset cube2World
-    cube2_world = XMMatrixIdentity();
-
-    //Define cube2's world space matrix
+    //SUN
+    c_sun_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Scale = XMMatrixScaling(1.3f, 1.3f, 1.3f);
+    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    c_sun_world = Scale * Rotation;
 
-    //Set cube2's world space matrix
-    cube2_world = Rotation * Scale;
+    //MERCURY
+    c_mercury_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
+    c_mercury_world = Scale * Rotation3 *Translation* Rotation; // IT WORKS!
+
+    //VENUS
+    c_venus_world = XMMatrixIdentity();
+    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis2, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+    c_venus_world = Scale * Translation * Rotation;
+
+    //EARTH
+    c_Earth_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+    Scale = XMMatrixScaling(4.5f, 4.5f, 4.5f);
+
+   // c_Earth_world = Translation * Rotation * Scale;
+    c_Earth_world =  Rotation * Translation * Rotation2 * Scale;
+
+    //MARS
+    c_Mars_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 30.0f);
+    Scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+    c_Mars_world = Translation * Rotation * Scale * Rotation2;
+
+    //UPITER
+    c_Upiter_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 20.0f);
+    Scale = XMMatrixScaling(4.5f, 4.5f, 4.5f);
+    c_Upiter_world = Translation * Rotation * Scale * Rotation3;
+
+    //Saturn
+    c_Saturn_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
+    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
+    c_Saturn_world = Translation * Rotation * Scale * Rotation2;
+
+    //Uran
+    c_Uran_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
+    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
+    c_Uran_world = Rotation * Translation * Rotation2 * Scale;
+
+    //Neptune
+    c_Neptune_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
+    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
+    c_Neptune_world = Translation * Rotation * Scale * Rotation3;
+
+    //Pluto
+    c_Pluto_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 70.0f);
+    Scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+    c_Pluto_world = Translation * Rotation * Scale * Rotation2;
+
+    //Luna
+    c_luna_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+    Scale = XMMatrixScaling(0.5f, 0.5f, 1.0f);
+    c_luna_world = c_mercury_world * Translation * Rotation2 * Scale;
+
 }
-///////////////**************new**************////////////////////
 
 void DrawScene()
 {
     //Clear our backbuffer
-    float bgColor[4] = { (0.0f, 0.0f, 0.0f, 0.0f) };
+    float bgColor[4] = { 0.827451050f,  0.827451050f, 0.827451050f, 1.0f };
     d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 
     //Refresh the Depth/Stencil view
     d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    ///////////////**************new**************////////////////////
     //Set the WVP matrix and send it to the constant buffer in effect file
-    WVP = cube1_world * camView * camProjection;
+    WVP = c_sun_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    //Draw the sun cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+
+    WVP = c_mercury_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    //Draw the mercury cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+
+     WVP = c_venus_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
-    //Draw the first cube
+    //Draw the Venus cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
-    WVP = cube2_world * camView * camProjection;
+    /* WVP = c_Earth_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
-    //Draw the second cube
+    //Draw the 4 cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Mars_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 5 cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Upiter_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 6 cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Saturn_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 7 cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Uran_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 8th cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Neptune_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 9th cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    WVP = c_Pluto_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 10th cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+     
+
+    WVP = c_luna_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+    //Draw the 11th cube
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+ */
+
     ///////////////**************new**************////////////////////
 
     //Present the backbuffer to the screen
