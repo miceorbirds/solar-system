@@ -42,11 +42,11 @@ LPCTSTR WndClassName = L"firstwindow";
 HWND hwnd = NULL;
 HRESULT hr;
 
-const int Width = 800;
-const int Height = 800;
+const int Width = 900;
+const int Height = 900;
 
 DirectX::XMMATRIX WVP;
-///////////////**************new**************////////////////////
+
 XMMATRIX c_mercury_world;
 XMMATRIX c_sun_world;
 XMMATRIX c_venus_world;
@@ -57,8 +57,8 @@ XMMATRIX c_Saturn_world;
 XMMATRIX c_Uran_world;
 XMMATRIX c_Neptune_world;
 XMMATRIX c_Pluto_world;
-XMMATRIX c_luna_world;
-///////////////**************new**************////////////////////
+XMMATRIX c_moon_world;
+
 XMMATRIX camView;
 XMMATRIX camProjection;
 
@@ -66,19 +66,21 @@ XMVECTOR camPosition;
 XMVECTOR camTarget;
 XMVECTOR camUp;
 
-///////////////**************new**************////////////////////
 XMMATRIX Rotation;
 XMMATRIX Scale;
 XMMATRIX Translation;
 float rot = 0.01f;
-float rot2 = 0.02f;
-float rot3 = 0.02f;
-float rot4 = 0.02f;
-float rot5 = 0.02f;
-float rot6 = 0.02f;
-float rot7 = 0.02f;
-float rot8 = 0.02f;
-///////////////**************new**************////////////////////
+float rot2 = 0.01f;
+float rot3 = 0.01f;
+float rot_merc = 0.01f;
+float rot_venus = 0.01f;
+float rot_earth = 0.01f;
+float rot_mars = 0.01f;
+float rot_upiter = 0.01f;
+float rot_saturn = 0.01f;
+float rot_neptune = 0.01f;
+float rot_pluto = 0.01f;
+float rot_moon = 0.01f;
 
 //Function Prototypes//
 bool InitializeDirect3d11App(HINSTANCE hInstance);
@@ -130,7 +132,6 @@ int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
     LPSTR lpCmdLine,
     int nShowCmd)
 {
-
     if (!InitializeWindow(hInstance, nShowCmd, Width, Height, true))
     {
         MessageBox(0, L"Window Initialization - Failed",
@@ -254,7 +255,6 @@ bool InitializeDirect3d11App(HINSTANCE hInstance)
     swapChainDesc.OutputWindow = hwnd;
     swapChainDesc.Windowed = TRUE;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
 
     //Create our SwapChain
     hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL,
@@ -383,19 +383,18 @@ bool InitScene()
     d3d11DevCon->VSSetShader(VS, 0, 0);
     d3d11DevCon->PSSetShader(PS, 0, 0);
 
-    ///////////////**************new**************////////////////////
     //Create the vertex buffer
     Vertex v[] =
     {
         Vertex(-1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
-        Vertex(-1.0f, +1.0f, -1.0f, 1.0f, 0.843137324f, 0.0f, 1.0f),
-        Vertex(+1.0f, +1.0f, -1.0f, 1.0f, 0.843137324f, 1.0f, 1.0f),
-        Vertex(+1.0f, -1.0f, -1.0f, 0.541176498f, 0.168627456f, 0.886274576f, 1.0f),
+        Vertex(-1.0f, +1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
+        Vertex(+1.0f, +1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
+        Vertex(+1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
 
-        Vertex(-1.0f, -1.0f, +1.0f, 0.541176498f, 0.168627456f, 0.886274576f, 1.0f),
-        Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
-        Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
-        Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 1.0f, 0.941176534f, 1.0f),
+        Vertex(-1.0f, -1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
+        Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
+        Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
+        Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
     };
 
     DWORD indices[] = {
@@ -464,7 +463,7 @@ bool InitScene()
 
     //Create the Input Layout
     hr = d3d11Device->CreateInputLayout(layout, numElements, VS_Buffer->GetBufferPointer(),
-        VS_Buffer->GetBufferSize(), &vertLayout);
+         VS_Buffer->GetBufferSize(), &vertLayout);
 
     //Set the Input Layout
     d3d11DevCon->IASetInputLayout(vertLayout);
@@ -486,7 +485,7 @@ bool InitScene()
     //Set the Viewport
     d3d11DevCon->RSSetViewports(1, &viewport);
 
-    //Create the buffer to send to the cbuffer in effect file
+    //Create the buffer
     D3D11_BUFFER_DESC cbbd;
     ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
@@ -499,9 +498,7 @@ bool InitScene()
     hr = d3d11Device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
 
     //Camera information
-    ///////////////**************new**************////////////////////
-    camPosition = XMVectorSet(0.0f, 7.0f, -15.0f, 0.0f);
-    ///////////////**************new**************////////////////////
+    camPosition = XMVectorSet(0.0f, 90.0f, -80.0f, 0.0f);
     camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -509,7 +506,7 @@ bool InitScene()
     camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
 
     //Set the Projection matrix
-    camProjection = XMMatrixPerspectiveFovLH(0.5f * 3.14f, (float)Width / Height, 1.0f, 1000.0f);
+    camProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, (float)Width / Height, 1.0f, 1000.0f);
 
     return true;
 }
@@ -525,92 +522,98 @@ void UpdateScene()
     if (rot > 6.26f)
         rot = 0.0f;
 
-    rot3 += .055f;
+    rot3 += .009f;
     if (rot > 6.26f)
         rot = 0.0f;
 
+    rot_merc += .0024;
+    if (rot_merc > 6.26f)
+        rot_merc = 0.0f;
+
     XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMVECTOR rotaxis2 = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-    XMMATRIX Rotation2 = XMMatrixRotationAxis(rotaxis, rot3);
-    XMMATRIX Rotation3 = XMMatrixRotationAxis(rotaxis2, rot3);
+
+    XMMATRIX SelfRotation = XMMatrixRotationAxis(rotaxis, -rot3);
+    XMMATRIX SelfRotation2 = XMMatrixRotationAxis(rotaxis, rot3);
+    XMMATRIX Rotation3 = XMMatrixRotationAxis(rotaxis2, rot);
 
     //SUN
-    c_sun_world = XMMatrixIdentity();
+    c_sun_world = XMMatrixIdentity(); // обнуляем матрицу
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
     Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    c_sun_world = Scale * Rotation;
+    c_sun_world = Translation * Rotation * Scale;
 
     //MERCURY
     c_mercury_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-    c_mercury_world = Scale * Rotation3 *Translation* Rotation; // IT WORKS!
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 7.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Scale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
+    XMMATRIX SelfRotation_merc = XMMatrixRotationAxis(rotaxis, rot_merc);
+    c_mercury_world = SelfRotation_merc * Translation * Rotation * Scale; // IT WORKS!
 
     //VENUS
     c_venus_world = XMMatrixIdentity();
-    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis2, -rot);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-    c_venus_world = Scale * Translation * Rotation;
+    Rotation = XMMatrixRotationAxis(rotaxis2, -rot);
+    Scale = XMMatrixScaling(0.4f, 0.4f, 0.4f);
+    c_venus_world = SelfRotation2 * Translation * Rotation * Scale; // IT WORKS!
 
     //EARTH
     c_Earth_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-    Scale = XMMatrixScaling(4.5f, 4.5f, 4.5f);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 8.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Scale = XMMatrixScaling(0.8f, 0.8f, 0.8f);
+    c_Earth_world = SelfRotation * Translation * Rotation * Scale;
 
-   // c_Earth_world = Translation * Rotation * Scale;
-    c_Earth_world =  Rotation * Translation * Rotation2 * Scale;
+    //Moon
+    c_moon_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 15.0f);
+    Scale = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+    c_moon_world = SelfRotation * Translation * Rotation * Scale * c_Earth_world;
 
     //MARS
     c_Mars_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 30.0f);
-    Scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-    c_Mars_world = Translation * Rotation * Scale * Rotation2;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+    Scale = XMMatrixScaling(1.1f, 1.1f, 1.1f);
+    c_Mars_world = SelfRotation * Translation * Rotation * Scale;
 
     //UPITER
     c_Upiter_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 20.0f);
-    Scale = XMMatrixScaling(4.5f, 4.5f, 4.5f);
-    c_Upiter_world = Translation * Rotation * Scale * Rotation3;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 15.0f);
+    Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
+    c_Upiter_world = SelfRotation * Translation * Rotation * Scale;
 
     //Saturn
     c_Saturn_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
-    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
-    c_Saturn_world = Translation * Rotation * Scale * Rotation2;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 20.0f);
+    Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
+    c_Saturn_world = SelfRotation * Translation * Rotation * Scale;
 
     //Uran
     c_Uran_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
-    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
-    c_Uran_world = Rotation * Translation * Rotation2 * Scale;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 25.0f);
+    Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
+    c_Uran_world = SelfRotation2 * Translation * Rotation * Scale;
 
     //Neptune
     c_Neptune_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 28.0f);
-    Scale = XMMatrixScaling(4.0f, 4.0f, 4.0f);
-    c_Neptune_world = Translation * Rotation * Scale * Rotation3;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 35.0f);
+    Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    c_Neptune_world = SelfRotation * Translation * Rotation * Scale;
 
     //Pluto
     c_Pluto_world = XMMatrixIdentity();
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 70.0f);
-    Scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-    c_Pluto_world = Translation * Rotation * Scale * Rotation2;
-
-    //Luna
-    c_luna_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-    Scale = XMMatrixScaling(0.5f, 0.5f, 1.0f);
-    c_luna_world = c_mercury_world * Translation * Rotation2 * Scale;
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 80.0f);
+    Scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+    c_Pluto_world = SelfRotation * Translation * Rotation * Scale;
 
 }
 
@@ -619,102 +622,86 @@ void DrawScene()
     //Clear our backbuffer
     float bgColor[4] = { 0.827451050f,  0.827451050f, 0.827451050f, 1.0f };
     d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
-
     //Refresh the Depth/Stencil view
     d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    //Set the WVP matrix and send it to the constant buffer in effect file
+
+    //Draw the sun
     WVP = c_sun_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-    //Draw the sun cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
-
+    //Draw the mercury
     WVP = c_mercury_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-    //Draw the mercury cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
-
-     WVP = c_venus_world * camView * camProjection;
+    //Draw the Venus
+    WVP = c_venus_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the Venus cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
-    /* WVP = c_Earth_world * camView * camProjection;
+    //Draw the Earth
+    WVP = c_Earth_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 4 cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
+    //Draw the Moon
+    WVP = c_moon_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    //Draw the Mars
     WVP = c_Mars_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 5 cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
+    //Draw the Upiter
     WVP = c_Upiter_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 6 cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
+    //Draw the Saturn
     WVP = c_Saturn_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 7 cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
+    //Draw the Uran
     WVP = c_Uran_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 8th cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
+    //Draw the Neptune
     WVP = c_Neptune_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 9th cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
-
+    
+    //Draw the Pluto
     WVP = c_Pluto_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 10th cube
     d3d11DevCon->DrawIndexed(36, 0, 0);
-     
-
-    WVP = c_luna_world * camView * camProjection;
-    cbPerObj.WVP = XMMatrixTranspose(WVP);
-    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-    //Draw the 11th cube
-    d3d11DevCon->DrawIndexed(36, 0, 0);
- */
-
-    ///////////////**************new**************////////////////////
 
     //Present the backbuffer to the screen
     SwapChain->Present(0, 0);
