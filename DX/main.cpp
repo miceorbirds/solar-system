@@ -58,6 +58,9 @@ XMMATRIX c_Uran_world;
 XMMATRIX c_Neptune_world;
 XMMATRIX c_Pluto_world;
 XMMATRIX c_moon_world;
+XMMATRIX c_io_world;
+XMMATRIX c_europe_world;
+XMMATRIX c_ganimed_world;
 
 XMMATRIX camView;
 XMMATRIX camProjection;
@@ -70,17 +73,34 @@ XMMATRIX Rotation;
 XMMATRIX Scale;
 XMMATRIX Translation;
 float rot = 0.01f;
-float rot2 = 0.01f;
-float rot3 = 0.01f;
+
 float rot_merc = 0.01f;
 float rot_venus = 0.01f;
 float rot_earth = 0.01f;
 float rot_mars = 0.01f;
 float rot_upiter = 0.01f;
 float rot_saturn = 0.01f;
+float rot_uran = 0.01f;
 float rot_neptune = 0.01f;
 float rot_pluto = 0.01f;
 float rot_moon = 0.01f;
+float rot_io = 0.01f;
+float rot_europe = 0.01f;
+float rot_ganimed = 0.01f;
+
+float rot_merc_self = 0.01f;
+float rot_venus_self = 0.01f;
+float rot_earth_self = 0.01f;
+float rot_mars_self = 0.01f;
+float rot_upiter_self = 0.01f;
+float rot_saturn_self = 0.01f;
+float rot_uran_self = 0.01f;
+float rot_neptune_self = 0.01f;
+float rot_pluto_self = 0.01f;
+float rot_moon_self = 0.01f;
+
+
+
 
 //Function Prototypes//
 bool InitializeDirect3d11App(HINSTANCE hInstance);
@@ -498,7 +518,7 @@ bool InitScene()
     hr = d3d11Device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
 
     //Camera information
-    camPosition = XMVectorSet(0.0f, 90.0f, -80.0f, 0.0f);
+    camPosition = XMVectorSet(0.0f, 20.0f, -50.0f, 0.0f);
     camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -518,24 +538,9 @@ void UpdateScene()
     if (rot > 6.26f)
         rot = 0.0f;
 
-    rot2 += .001f;
-    if (rot > 6.26f)
-        rot = 0.0f;
-
-    rot3 += .009f;
-    if (rot > 6.26f)
-        rot = 0.0f;
-
-    rot_merc += .0024;
-    if (rot_merc > 6.26f)
-        rot_merc = 0.0f;
 
     XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    XMVECTOR rotaxis2 = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-
-    XMMATRIX SelfRotation = XMMatrixRotationAxis(rotaxis, -rot3);
-    XMMATRIX SelfRotation2 = XMMatrixRotationAxis(rotaxis, rot3);
-    XMMATRIX Rotation3 = XMMatrixRotationAxis(rotaxis2, rot);
+    XMVECTOR rotaxis2 = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
     //SUN
     c_sun_world = XMMatrixIdentity(); // обнуляем матрицу
@@ -545,75 +550,170 @@ void UpdateScene()
     c_sun_world = Translation * Rotation * Scale;
 
     //MERCURY
+    rot_merc += .003;
+    if (rot_merc > 6.26f)
+        rot_merc = 0.0f;
+    rot_merc_self += .00001407;
+    if (rot_merc_self > 6.26f)
+        rot_merc_self = 0.0f;
     c_mercury_world = XMMatrixIdentity();
     Translation = XMMatrixTranslation(0.0f, 0.0f, 7.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_merc);
     Scale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
-    XMMATRIX SelfRotation_merc = XMMatrixRotationAxis(rotaxis, rot_merc);
+    XMMATRIX SelfRotation_merc = XMMatrixRotationAxis(rotaxis, -rot_merc_self);
     c_mercury_world = SelfRotation_merc * Translation * Rotation * Scale; // IT WORKS!
 
     //VENUS
+    rot_venus += .002;
+    if (rot_venus > 6.26f)
+        rot_venus = 0.0f;
+    rot_venus_self += .000005832;
+    if (rot_venus_self > 6.26f)
+        rot_venus_self = 0.0f;
     c_venus_world = XMMatrixIdentity();
     Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis2, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis2, -rot_venus);
     Scale = XMMatrixScaling(0.4f, 0.4f, 0.4f);
-    c_venus_world = SelfRotation2 * Translation * Rotation * Scale; // IT WORKS!
+    XMMATRIX SelfRotation_venus = XMMatrixRotationAxis(rotaxis, rot_venus_self);
+    c_venus_world = SelfRotation_venus * Translation * Rotation * Scale; // IT WORKS!
 
     //EARTH
+    rot_earth += .001;
+    if (rot_earth > 6.26f)
+        rot_earth = 0.0f;
+    rot_earth_self += .0023;
+    if (rot_earth_self > 6.26f)
+        rot_earth_self = 0.0f;
     c_Earth_world = XMMatrixIdentity();
     Translation = XMMatrixTranslation(0.0f, 0.0f, 8.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_earth);
     Scale = XMMatrixScaling(0.8f, 0.8f, 0.8f);
-    c_Earth_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX earth = Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_earth = XMMatrixRotationAxis(rotaxis, -rot_earth_self);
+    c_Earth_world = SelfRotation_earth * Translation * Rotation * Scale;
 
     //Moon
+    rot_moon += .012;
+    if (rot_moon > 6.26f)
+        rot_moon = 0.0f;
     c_moon_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_moon);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 15.0f);
     Scale = XMMatrixScaling(0.1f, 0.1f, 0.1f);
-    c_moon_world = SelfRotation * Translation * Rotation * Scale * c_Earth_world;
+    c_moon_world = Translation * Rotation * Scale * earth;
 
     //MARS
+    rot_mars += .0005;
+    if (rot_mars > 6.26f)
+        rot_mars = 0.0f;
+    rot_mars_self += .0024;
+    if (rot_mars_self > 6.26f)
+        rot_mars_self = 0.0f;
     c_Mars_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_mars);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
     Scale = XMMatrixScaling(1.1f, 1.1f, 1.1f);
-    c_Mars_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_mars = XMMatrixRotationAxis(rotaxis, -rot_mars_self);
+    c_Mars_world = SelfRotation_mars * Translation * Rotation * Scale;
 
     //UPITER
+    rot_upiter += .000083;
+    if (rot_upiter > 6.26f)
+        rot_upiter = 0.0f;
+    rot_upiter_self += .0099;
+    if (rot_upiter_self > 6.26f)
+        rot_upiter_self = 0.0f;
     c_Upiter_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_upiter);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 15.0f);
     Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
-    c_Upiter_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX upiter = Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_upiter = XMMatrixRotationAxis(rotaxis, -rot_upiter_self);
+    c_Upiter_world = SelfRotation_upiter * Translation * Rotation * Scale;
+
+    //io
+    rot_io += .008;
+    if (rot_io > 6.26f)
+        rot_io = 0.0f;
+    c_io_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_io);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 15.0f);
+    Scale = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+    c_io_world = Translation * Rotation * Scale * upiter;
+    //europe
+    rot_europe += .004;
+    if (rot_europe > 6.26f)
+        rot_europe = 0.0f;
+    c_europe_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_europe);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 20.0f);
+    Scale = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+    c_europe_world = Translation * Rotation * Scale * upiter;
+    //ganimed
+    rot_ganimed += .002;
+    if (rot_ganimed > 6.26f)
+        rot_ganimed = 0.0f;
+    c_ganimed_world = XMMatrixIdentity();
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_ganimed);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 25.0f);
+    Scale = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+    c_ganimed_world = Translation * Rotation * Scale * upiter;
 
     //Saturn
+    rot_saturn += .000034;
+    if (rot_saturn > 6.26f)
+        rot_saturn = 0.0f;
+    rot_saturn_self += .0010;
+    if (rot_saturn_self > 6.26f)
+        rot_saturn_self = 0.0f;
     c_Saturn_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_saturn);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 20.0f);
     Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
-    c_Saturn_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_saturn = XMMatrixRotationAxis(rotaxis, -rot_upiter_self);
+    c_Saturn_world = SelfRotation_saturn * Translation * Rotation * Scale;
 
     //Uran
+    rot_uran += .0000119;
+    if (rot_uran > 6.26f)
+        rot_uran = 0.0f;
+    rot_uran_self += .0017;
+    if (rot_uran_self > 6.26f)
+        rot_uran_self = 0.0f;
     c_Uran_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_uran);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 25.0f);
     Scale = XMMatrixScaling(1.2f, 1.2f, 1.2f);
-    c_Uran_world = SelfRotation2 * Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_uran = XMMatrixRotationAxis(rotaxis, -rot_uran_self);
+    c_Uran_world = SelfRotation_uran * Translation * Rotation * Scale;
 
     //Neptune
+    rot_neptune += .00000613;
+    if (rot_neptune > 6.26f)
+        rot_neptune = 0.0f;
+    rot_neptune_self += .0016;
+    if (rot_neptune_self > 6.26f)
+        rot_neptune_self = 0.0f;
     c_Neptune_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_neptune);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 35.0f);
     Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    c_Neptune_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_neptune = XMMatrixRotationAxis(rotaxis, -rot_neptune_self);
+    c_Neptune_world = SelfRotation_neptune * Translation * Rotation * Scale;
 
     //Pluto
+    rot_pluto += .00000401;
+    if (rot_pluto > 6.26f)
+        rot_pluto = 0.0f;
+    rot_pluto_self += .000153;
+    if (rot_pluto_self > 6.26f)
+        rot_pluto_self = 0.0f;
     c_Pluto_world = XMMatrixIdentity();
-    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot_pluto);
     Translation = XMMatrixTranslation(0.0f, 0.0f, 80.0f);
     Scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-    c_Pluto_world = SelfRotation * Translation * Rotation * Scale;
+    XMMATRIX SelfRotation_pluto = XMMatrixRotationAxis(rotaxis, -rot_pluto_self);
+    c_Pluto_world = SelfRotation_pluto * Translation * Rotation * Scale;
 
 }
 
@@ -670,6 +770,27 @@ void DrawScene()
 
     //Draw the Upiter
     WVP = c_Upiter_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    //Draw the io
+    WVP = c_io_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    //Draw the Europe
+    WVP = c_europe_world * camView * camProjection;
+    cbPerObj.WVP = XMMatrixTranspose(WVP);
+    d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+    d3d11DevCon->DrawIndexed(36, 0, 0);
+
+    //Draw the ganimed
+    WVP = c_ganimed_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
     d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
