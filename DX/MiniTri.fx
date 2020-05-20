@@ -3,22 +3,22 @@ cbuffer cbPerObject
     float4x4 WVP;
 };
 
-struct VS_OUTPUT
+cbuffer colorBuf
 {
-    float4 Pos : SV_POSITION;
-    float4 Color : COLOR;
+    float4 face_colors[6];
 };
 
-VS_OUTPUT VS(float4 inPos : POSITION, float4 inColor : COLOR)
+struct VS_OUTPUT
 {
-    VS_OUTPUT output;
-    output.Pos = mul(inPos, WVP);
-    output.Color = inColor;
+    float4 pos : SV_POSITION;
+};
 
-    return output;
+float4 VS(float4 pos : POSITION) : SV_Position
+{
+    return mul(pos, WVP);
 }
 
-float4 PS(VS_OUTPUT input) : SV_TARGET
+float4 PS(uint tid : SV_PrimitiveID) : SV_Target
 {
-    return input.Color;
+    return face_colors[tid / 2];
 }

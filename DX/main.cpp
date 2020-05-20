@@ -131,20 +131,19 @@ cbPerObject cbPerObj;
 //Vertex Structure and Vertex Layout (Input Layout)//
 struct Vertex    //Overloaded Vertex Structure
 {
-    Vertex() {}
-    Vertex(float x, float y, float z,
-        float cr, float cg, float cb, float ca)
-        : pos(x, y, z), color(cr, cg, cb, ca) {}
-
-    XMFLOAT3 pos;
-    XMFLOAT4 color;
+    struct
+    {
+        float x;
+        float y;
+        float z;
+    } pos;
 };
 
 D3D11_INPUT_ELEMENT_DESC layout[] =
 {
     { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
+
 UINT numElements = ARRAYSIZE(layout);
 
 int WINAPI WinMain(HINSTANCE hInstance,    //Main windows function
@@ -406,41 +405,23 @@ bool InitScene()
     //Create the vertex buffer
     Vertex v[] =
     {
-        Vertex(-1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
-        Vertex(-1.0f, +1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
-        Vertex(+1.0f, +1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
-        Vertex(+1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.1f, 1.0f),
-
-        Vertex(-1.0f, -1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
-        Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
-        Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
-        Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.388235331f, 0.278431386f, 1.0f),
+        { -1.0f, -1.0f, -1.0f },
+        {  1.0f, -1.0f, -1.0f },
+        { -1.0f,  1.0f, -1.0f },
+        {  1.0f,  1.0f, -1.0f },
+        { -1.0f, -1.0f,  1.0f },
+        {  1.0f, -1.0f,  1.0f },
+        { -1.0f,  1.0f,  1.0f },
+        {  1.0f,  1.0f,  1.0f },
     };
 
     DWORD indices[] = {
-        // front face
-        0, 1, 2,
-        0, 2, 3,
-
-        // back face
-        4, 6, 5,
-        4, 7, 6,
-
-        // left face
-        4, 5, 1,
-        4, 1, 0,
-
-        // right face
-        3, 2, 6,
-        3, 6, 7,
-
-        // top face
-        1, 5, 6,
-        1, 6, 2,
-
-        // bottom face
-        4, 0, 3,
-        4, 3, 7
+        0,2,1, 2,3,1,
+        1,3,5, 3,7,5,
+        2,6,3, 3,6,7,
+        4,5,7, 4,7,6,
+        0,4,2, 2,4,6,
+        0,1,4, 1,5,4
     };
 
     D3D11_BUFFER_DESC indexBufferDesc;
@@ -505,7 +486,7 @@ bool InitScene()
     //Set the Viewport
     d3d11DevCon->RSSetViewports(1, &viewport);
 
-    //Create the buffer
+    //Create the constant buffer
     D3D11_BUFFER_DESC cbbd;
     ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
@@ -516,6 +497,44 @@ bool InitScene()
     cbbd.MiscFlags = 0;
 
     hr = d3d11Device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
+
+    // lookup table for cube face colors
+    struct ConstantBuffer2
+    {
+        struct
+        {
+            float r;
+            float g;
+            float b;
+            float a;
+        } face_colors[6];
+    };
+    const ConstantBuffer2 cb2 =
+    {
+        {
+            {1.0f,0.0f,1.0f},
+            {1.0f,0.0f,0.0f},
+            {0.0f,1.0f,0.0f},
+            {0.0f,0.0f,1.0f},
+            {1.0f,1.0f,0.0f},
+            {0.0f,1.0f,1.0f},
+        }
+    };
+    ID3D11Buffer* pConstantBuffer2;
+    D3D11_BUFFER_DESC cbd2;
+    cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cbd2.Usage = D3D11_USAGE_DEFAULT;
+    cbd2.CPUAccessFlags = 0u;
+    cbd2.MiscFlags = 0u;
+    cbd2.ByteWidth = sizeof(cb2);
+    cbd2.StructureByteStride = 0u;
+    D3D11_SUBRESOURCE_DATA csd2 = {};
+    csd2.pSysMem = &cb2;
+    d3d11Device->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2);
+
+    // bind constant buffer to pixel shader
+    d3d11DevCon->PSSetConstantBuffers(0u, 1u, &pConstantBuffer2);
+
 
     //Camera information
     camPosition = XMVectorSet(0.0f, 20.0f, -50.0f, 0.0f);
@@ -724,104 +743,90 @@ void DrawScene()
     d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
     //Refresh the Depth/Stencil view
     d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
     //Draw the sun
     WVP = c_sun_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the mercury
     WVP = c_mercury_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Venus
     WVP = c_venus_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Earth
     WVP = c_Earth_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Moon
     WVP = c_moon_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Mars
     WVP = c_Mars_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Upiter
     WVP = c_Upiter_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the io
     WVP = c_io_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Europe
     WVP = c_europe_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the ganimed
     WVP = c_ganimed_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Saturn
     WVP = c_Saturn_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Uran
     WVP = c_Uran_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Draw the Neptune
     WVP = c_Neptune_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
     
     //Draw the Pluto
     WVP = c_Pluto_world * camView * camProjection;
     cbPerObj.WVP = XMMatrixTranspose(WVP);
     d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-    d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
     d3d11DevCon->DrawIndexed(36, 0, 0);
 
     //Present the backbuffer to the screen
@@ -851,7 +856,7 @@ int messageloop() {
         else {
             // run game code            
             UpdateScene();
-            DrawScene();
+            DrawScene(); 
         }
     }
     return msg.wParam;
