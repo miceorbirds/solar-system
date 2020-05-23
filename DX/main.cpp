@@ -733,7 +733,6 @@ void UpdateScene()
     Scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
     XMMATRIX SelfRotation_pluto = XMMatrixRotationAxis(rotaxis, -rot_pluto_self);
     c_Pluto_world = SelfRotation_pluto * Translation * Rotation * Scale;
-
 }
 
 void DrawScene()
