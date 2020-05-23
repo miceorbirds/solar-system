@@ -223,7 +223,7 @@ bool InitializeWindow(HINSTANCE hInstance,
     hwnd = CreateWindowEx(
         NULL,
         WndClassName,
-        L"Lesson 4 - Begin Drawing",
+        L"E pur si muove!",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         width, height,
