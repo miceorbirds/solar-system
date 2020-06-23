@@ -257,7 +257,7 @@ bool InitializeDirect3d11App(HINSTANCE hInstance)
     bufferDesc.Height = Height;
     bufferDesc.RefreshRate.Numerator = 0;
     bufferDesc.RefreshRate.Denominator = 1;
-    bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
     bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     bufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
